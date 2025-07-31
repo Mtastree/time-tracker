@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时光迹 - 高效时间记录与分析应用</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>时光迹</h1>
+    </header>
+    
+    <main>
+      <section id="task-section">
+        <h2>任务标签</h2>
+        <div class="task-list" id="task-list">
+          <!-- 任务标签将通过JavaScript动态添加 -->
+        </div>
+        
+        <div class="add-task">
+          <input type="text" id="new-task-input" placeholder="输入新任务标签...">
+          <button id="add-task-btn">添加</button>
+        </div>
+      </section>
+      
+      <section id="history-section">
+        <h2>历史记录</h2>
+        <div class="history-controls">
+          <button id="prev-month-btn">上个月</button>
+          <div id="current-month-display">2023年12月</div>
+          <button id="next-month-btn">下个月</button>
+        </div>
+        <div class="calendar-view" id="calendar-view">
+          <!-- 日历视图将通过JavaScript动态添加 -->
+        </div>
+        <div class="day-details" id="day-details">
+          <h3 id="selected-date-display">选择的日期</h3>
+          <div class="day-total" id="day-total"></div>
+          <div class="day-records" id="day-records">
+            <!-- 选中日期的记录将通过JavaScript动态添加 -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <!-- 自定义模态对话框 -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modal-title">编辑任务标签</h3>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="modal-input" class="modal-input">
+        <p id="modal-message" class="modal-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-cancel-btn" class="modal-btn">取消</button>
+        <button id="modal-confirm-btn" class="modal-btn modal-confirm-btn">确定</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

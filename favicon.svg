@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 外圆 -->
+  <circle cx="32" cy="32" r="30" fill="#007AFF" opacity="0.1" />
+  
+  <!-- 时钟外圈 -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#007AFF" stroke-width="2" />
+  
+  <!-- 时钟刻度 -->
+  <line x1="32" y1="8" x2="32" y2="12" stroke="#007AFF" stroke-width="2" stroke-linecap="round" />
+  <line x1="32" y1="52" x2="32" y2="56" stroke="#007AFF" stroke-width="2" stroke-linecap="round" />
+  <line x1="8" y1="32" x2="12" y2="32" stroke="#007AFF" stroke-width="2" stroke-linecap="round" />
+  <line x1="52" y1="32" x2="56" y2="32" stroke="#007AFF" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- 时钟指针 -->
+  <line x1="32" y1="32" x2="32" y2="16" stroke="#007AFF" stroke-width="2" stroke-linecap="round" />
+  <line x1="32" y1="32" x2="44" y2="32" stroke="#007AFF" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- 中心点 -->
+  <circle cx="32" cy="32" r="3" fill="#007AFF" />
+  
+  <!-- 轨迹线 -->
+  <path d="M32,32 Q42,22 48,32 T56,40" stroke="#FF9500" stroke-width="2" fill="none" stroke-linecap="round" />
+</svg>
