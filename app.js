@@ -22,16 +22,40 @@ const prevMonthBtn = document.getElementById('prev-month-btn');
 const nextMonthBtn = document.getElementById('next-month-btn');
 const newTaskInput = document.getElementById('new-task-input');
 const addTaskBtn = document.getElementById('add-task-btn');
+const statsViewEl = document.getElementById('stats-view');
+const monthStatsBtn = document.getElementById('month-stats-btn');
+const yearStatsBtn = document.getElementById('year-stats-btn');
 
 // 日历状态
 let currentCalendarDate = new Date();
 let selectedDate = new Date();
 
+// 统计状态
+let currentStatsMode = 'month'; // 'month' 或 'year'
+
 // 初始化应用
 function initApp() {
   loadData();
+  
+  // 添加统计切换事件监听器
+  monthStatsBtn.addEventListener('click', () => {
+    if (currentStatsMode !== 'month') {
+      currentStatsMode = 'month';
+      updateStatsTabUI();
+      renderStats();
+    }
+  });
+  
+  yearStatsBtn.addEventListener('click', () => {
+    if (currentStatsMode !== 'year') {
+      currentStatsMode = 'year';
+      updateStatsTabUI();
+      renderStats();
+    }
+  });
   renderTasks();
   renderCalendar();
+  renderStats(); // 初始渲染统计视图
   setupEventListeners();
 }
 
@@ -48,6 +72,7 @@ function loadData() {
 function saveData() {
   localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
   localStorage.setItem(RECORDS_STORAGE_KEY, JSON.stringify(records));
+  renderStats(); // 更新统计视图
 }
 
 // 设置事件监听器
@@ -61,11 +86,13 @@ function setupEventListeners() {
   prevMonthBtn.addEventListener('click', () => {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
     renderCalendar();
+    renderStats(); // 更新统计视图
   });
   
   nextMonthBtn.addEventListener('click', () => {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
     renderCalendar();
+    renderStats(); // 更新统计视图
   });
 }
 
@@ -640,6 +667,99 @@ function renderDayDetails(date) {
   });
 }
 
+// 按任务分组统计时间
+function groupRecordsByTask(records) {
+  const taskStats = {};
+  let totalDuration = 0;
+  
+  // 按任务ID分组并计算总时长
+  records.forEach(record => {
+    if (!taskStats[record.taskId]) {
+      taskStats[record.taskId] = {
+        id: record.taskId,
+        name: record.taskName,
+        duration: 0
+      };
+    }
+    
+    taskStats[record.taskId].duration += record.duration;
+    totalDuration += record.duration;
+  });
+  
+  // 转换为数组并计算百分比
+  const statsArray = Object.values(taskStats).map(stat => {
+    return {
+      ...stat,
+      percentage: totalDuration > 0 ? (stat.duration / totalDuration * 100) : 0
+    };
+  });
+  
+  // 按时长降序排序
+  statsArray.sort((a, b) => b.duration - a.duration);
+  
+  return {
+    tasks: statsArray,
+    totalDuration: totalDuration
+  };
+}
+
+// 渲染统计视图
+function renderStats() {
+  // 清空统计视图
+  statsViewEl.innerHTML = '';
+  
+  let periodRecords = [];
+  let periodTitle = '';
+  
+  // 根据当前统计模式获取相应时间段的记录
+  if (currentStatsMode === 'month') {
+    // 获取当前月份的记录
+    const currentMonth = `${currentCalendarDate.getFullYear()}-${(currentCalendarDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const recordsByMonth = groupRecordsByMonth(records);
+    periodRecords = recordsByMonth[currentMonth] || [];
+    periodTitle = `${currentCalendarDate.getFullYear()}年${currentCalendarDate.getMonth() + 1}月统计`;
+  } else {
+    // 获取当前年份的记录
+    const currentYear = currentCalendarDate.getFullYear().toString();
+    const recordsByYear = groupRecordsByYear(records);
+    periodRecords = recordsByYear[currentYear] || [];
+    periodTitle = `${currentYear}年统计`;
+  }
+  
+  // 如果没有记录，显示空消息
+  if (periodRecords.length === 0) {
+    statsViewEl.innerHTML = `<div class="stats-empty">该时间段暂无记录</div>`;
+    return;
+  }
+  
+  // 按任务分组统计
+  const stats = groupRecordsByTask(periodRecords);
+  
+  // 创建标题和总计
+  const summaryEl = document.createElement('div');
+  summaryEl.className = 'stats-summary';
+  summaryEl.textContent = `${periodTitle} - 总计: ${formatTime(stats.totalDuration)}`;
+  statsViewEl.appendChild(summaryEl);
+  
+  // 渲染每个任务的统计
+  stats.tasks.forEach(task => {
+    const taskEl = document.createElement('div');
+    taskEl.className = 'stats-item';
+    
+    taskEl.innerHTML = `
+      <div class="stats-item-header">
+        <div class="stats-item-name">${task.name}</div>
+        <div class="stats-item-duration">${formatTime(task.duration)}</div>
+      </div>
+      <div class="stats-bar-container">
+        <div class="stats-bar" style="width: ${task.percentage}%"></div>
+      </div>
+    `;
+    
+    statsViewEl.appendChild(taskEl);
+  });
+}
+
 // 获取指定日期的记录
 function getRecordsForDay(date) {
   return records.filter(record => {
@@ -664,6 +784,48 @@ function groupRecordsByDay(records) {
   });
   
   return groups;
+}
+
+// 按月分组记录
+function groupRecordsByMonth(records) {
+  const groups = {};
+  
+  records.forEach(record => {
+    const date = new Date(record.startTime);
+    const month = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    if (!groups[month]) {
+      groups[month] = [];
+    }
+    
+    groups[month].push(record);
+  });
+  
+  return groups;
+}
+
+// 按年分组记录
+function groupRecordsByYear(records) {
+  const groups = {};
+  
+  records.forEach(record => {
+    const date = new Date(record.startTime);
+    const year = date.getFullYear().toString();
+    
+    if (!groups[year]) {
+      groups[year] = [];
+    }
+    
+    groups[year].push(record);
+  });
+  
+  return groups;
+}
+
+// 更新统计标签UI
+function updateStatsTabUI() {
+  monthStatsBtn.classList.toggle('active', currentStatsMode === 'month');
+  yearStatsBtn.classList.toggle('active', currentStatsMode === 'year');
 }
 
 // 格式化时间（秒 -> HH:MM:SS）
